@@ -1,177 +1,106 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(TodoApp());
 }
 
-class Column1 extends StatelessWidget {
+class TodoApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      flex: 10,
-      child: Container(
-        color: Colors.white,
-        child: Column(
-          children: [
-            Expanded(
-                child: Container(
-              child: Row(
-                children: [
-                  Expanded(
-                      flex: 1,
-                      child: Container(
-                        child: Column(
-                          children: [
-                            Expanded(
-                                flex: 1,
-                                child: Container(
-                                  color: Colors.black54,
-                                )),
-                            Expanded(
-                                flex: 1,
-                                child: Container(
-                                  color: Colors.orange,
-                                )),
-                            Expanded(
-                                flex: 1,
-                                child: Container(
-                                  color: Colors.lightBlueAccent,
-                                )),
-                            Expanded(
-                                flex: 1,
-                                child: Container(
-                                  color: Colors.pinkAccent,
-                                ))
-                          ],
-                        ),
-                      )),
-                  Expanded(
-                      flex: 2,
-                      child: Container(
-                        color: Colors.blue,
-                        child: Column(
-                          children: [
-                            Flexible(
-                              flex: 3,
-                              child: Container(
-                                color: Colors.blue,
-                              ),
-                            ),
-                            Flexible(
-                              flex: 1,
-                              child: Container(
-                                color: Colors.white,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: Container(
-                                      color: Colors.green,
-                                    )),
-                                    Expanded(
-                                        child: Container(
-                                      color: Colors.yellowAccent,
-                                    ))
-                                  ],
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ))
-                ],
+    return MaterialApp(title: 'Todo List', home: TodoListState());
+  }
+}
+
+class TodoListState extends StatefulWidget {
+  @override
+  _TodoListStateState createState() => _TodoListStateState();
+}
+
+class _TodoListStateState extends State<TodoListState> {
+  List<String> _todoItems = [];
+
+  void _addItem(String task) {
+    if (task.length > 0) {
+      setState(() {
+        _todoItems.add(task);
+      });
+    }
+  }
+
+  void _removeItem(int index) {
+    setState(() {
+      _todoItems.removeAt(index);
+    });
+  }
+
+  void _promptRemoveTodoItem(int index) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            title: Text('Mark "${_todoItems[index]}" as done?'),
+            actions: [
+              FlatButton(
+                  onPressed: () => Navigator.of(context).pop(), child: Text('Cancel')
               ),
-            )),
-            Expanded(
-                flex: 2,
-                child: Container(
-                  color: Colors.black,
-                )),
-            Expanded(
-                flex: 2,
-                child: Container(
-                  color: Colors.yellow,
-                )),
-            Expanded(
-                flex: 2,
-                child: Container(
-                  color: Colors.white,
-                ))
-          ],
+              FlatButton(onPressed: () {
+                _removeItem(index);
+                Navigator.of(context).pop();
+              }, child: new Text('MARK AS DONE'))
+            ],
+          );
+        });
+  }
+
+  Widget _buildTodoItem(String todoText, int index) {
+    return new ListTile(
+        title: new Text(todoText),
+        onTap: () => _promptRemoveTodoItem(index)
+    );
+  }
+
+  Widget _buildTodoList() {
+    return new ListView.builder(
+      itemBuilder: (context, index) {
+        if(index < _todoItems.length) {
+          return _buildTodoItem(_todoItems[index], index);
+        }
+      },
+    );
+  }
+
+  void _pushAddTodoScreen() {
+    Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+      return new Scaffold(
+        appBar: AppBar(
+          title: Text('Add a new task'),
         ),
-      ),
-    );
-  }
-}
-
-class Column2 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: 12,
-      child: Container(
-        color: Colors.pinkAccent,
-      ),
-    );
-  }
-}
-
-class Column3 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: 1,
-      child: Container(
-        color: Colors.white,
-      ),
-    );
-  }
-}
-
-class Column4 extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      flex: 7,
-      child: Container(
-        color: Colors.green,
-      ),
-    );
-  }
-}
-
-class MyApp extends StatelessWidget {
-  Widget _App() {
-    return Stack(
-      children: [
-        Row(
-          children: [
-            Column1(),
-            Column2(),
-            Column3(),
-            Column4(),
-          ],
+        body: TextField(
+          autofocus: true,
+          onSubmitted: (val) {
+            _addItem(val);
+            Navigator.pop(context);
+          },
+          decoration: InputDecoration(
+              hintText: 'Enter something todo ...',
+              contentPadding: const EdgeInsets.all(16)),
         ),
-        Positioned(
-            top: 400,
-            left: 50,
-            child: Container(
-              color: Colors.black,
-              width: 150,
-              height: 150,
-            )),
-      ],
-    );
+      );
+    }));
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Welcome to Flutter',
-      home: Scaffold(
-          appBar: AppBar(
-            title: Text('Flutter layout demo'),
-          ),
-          body: _App()),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Todo Application'),
+      ),
+      body: _buildTodoList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _pushAddTodoScreen,
+        tooltip: 'Add task',
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
